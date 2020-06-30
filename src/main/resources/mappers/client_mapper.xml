@@ -3,11 +3,10 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="client_mapper">
-    <select id="getById" resultMap="client_map">
+    <select id="getClientByLogin" resultMap="client_map">
         select * from
-        client c left join message m
-        on c.c_id=m.m_client_id
-        where c.c_id = #{id}
+        client
+        where login = #{login}
     </select>
 
     <select id="get" resultMap="client_map">
@@ -22,21 +21,22 @@
     </delete>
 
     <insert id="create">
-        insert into client(c_name, u_password, dateConnection)
-        values(#{name},#{password}, CURRENT_TIME())
+        insert into client(login, password, dateConnection, salt)
+        values(#{login},#{password},CURRENT_TIME(),#{salt})
     </insert>
 
     <update id="update">
         update client
-        set c_name=#{name}
-        where c_id=#{id}
+        set dateConnection=#{CURRENT_TIME()}
+        where login=#{login}
     </update>
 
     <resultMap id="client_map" type="myChat.Client" autoMapping="false">
         <id property="id" column="c_id"/>
-        <result property="name" column="c_name"/>
+        <result property="login" column="login"/>
         <result property="dateConnection" column="dateConnection"/>
-        <result property="password" column="u_password"/>
+        <result property="password" column="password"/>
+        <result property="salt" column="salt"/>
         <collection property="messages" ofType="myChat.bo.ConnectMessage"> <!-- item -->
             <id property="id" column="m_id" />
             <result property="message" column="m_message" />

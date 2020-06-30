@@ -17,24 +17,25 @@ public class MessageDAOImpl implements MessageDAO {
         sqlSession.commit();
         sqlSession.close();
     }
-
-    @Override
-    public ConnectMessage getById(long id) {
-        return null;
-    }
-
-    @Override
-    public List<ConnectMessage> get() {
-        return null;
-    }
-
     @Override
     public void update(ConnectMessage msg) {
 
     }
 
-    @Override
-    public void delete(long id) {
+//    @Override
+//    public ConnectMessage getById(long id) {
+//        return null;
+//    }
+//
+//    @Override
+//    public List<ConnectMessage> get() {
+//        return null;
+//    }
 
-    }
+
+
+//    @Override
+//    public void delete(long id) {
+//
+//    }
 }

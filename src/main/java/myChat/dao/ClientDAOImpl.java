@@ -17,9 +17,9 @@ public class ClientDAOImpl implements ClientDAO {
         sqlSession.close();
     }
 
-    public Client getById(long id) {
+    public Client getClientByLogin(String login) {
         SqlSession sqlSession = SessionFactory.getSession();
-        Client cat = sqlSession.selectOne(namespace + ".getById", id);
+        Client cat = sqlSession.selectOne(namespace + ".getClientByLogin", login);
         sqlSession.close();
         return cat;
     }

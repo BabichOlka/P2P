@@ -28,7 +28,7 @@ public class Connection extends Thread{
         while(true){
             ConnectMessage msg = null;
             try {
-                msg = new XMLunMarshaller().unmarshall(objr.getPath());
+                msg = new XMLunMarshaller().unmarshall(objr.getPath());//readMessage
             } catch (JAXBException ignored) {}//  do nothing
               catch (IOException e) { e.printStackTrace(); }
 

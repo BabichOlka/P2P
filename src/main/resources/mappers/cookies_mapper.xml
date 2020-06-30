@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cookies_mapper">
+
+    <select id="get" resultMap="cookies_map">
+        select * from
+        cookies where login=#{login}
+    </select>
+
+
+    <insert id="create">
+        insert into client(c_name, u_password, dateConnection)
+        values(#{name},#{password}, CURRENT_TIME())
+    </insert>
+
+    <update id="update">
+        update client
+        set login=#{login}
+        where login=#{login}
+    </update>
+
+    <resultMap id="cookies_map" type="myChat.Client" autoMapping="false">
+        <id property="id" column="c_id"/>
+        <result property="login" column="login"/>
+        <result property="dateConnection" column="dateConnection"/>
+        <result property="password" column="u_password"/>
+
+    </resultMap>
+
+</mapper>

@@ -41,7 +41,7 @@ public class Server{
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                Connection conn = new Connection(((InitMessage) imsg).getName());
+                Connection conn = new Connection(((InitMessage) imsg).getLogin());
                 conn.start();
                 clearBuffer(SerializationUtil.getREADER_INIT());
             }
@@ -49,8 +49,8 @@ public class Server{
     }
 
     private static boolean checkClient(InitMessage imsg){
-        if (imsg.getHost().equals(HOST) && imsg.getPort() == PORT && AVAILABLE_CLIENTS.contains(imsg.getToken())){
-            File client = new File(System.getProperty("user.dir") + "/src/main/resources/" + imsg.getName() + ".xml");
+          if (imsg.getHost().equals(HOST) && imsg.getPort() == PORT && AVAILABLE_CLIENTS.contains(imsg.getToken())){
+            File client = new File(System.getProperty("user.dir") + "/src/main/resources/" + imsg.getLogin() + ".xml");
             try {
                 client.createNewFile();
             } catch (IOException e) {
