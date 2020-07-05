@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cookies_mapper">
+
+    <select id="get" resultMap="cookies_map">
+        select * from
+        cookies where login=#{login}
+    </select>
+    <select id="getKeyByLogin" resultMap="cookies_map">
+        select keyu from
+        cookies where login=#{login}
+    </select>
+
+    <insert id="create">
+        insert into cookies (login, dateConection,keyu)
+        values(#{login}, CURRENT_TIME(), #{key})
+    </insert>
+
+    <update id="update">
+        update cookies
+        set dateConection = CURRENT_TIME()
+        where login=#{login}
+    </update>
+
+    <update id="updateDB">
+
+        update cookies
+        set keyu = null
+        where (now()-dateConection) &#60; 998000
+
+    </update>
+
+    <resultMap id="cookies_map" type="myChat.bo.Cookies" autoMapping="false">
+        <id property="idClient" column="idClient"/>
+        <result property="login" column="login"/>
+        <result property="dateConnection" column="dateConection"/>
+        <result property="key" column="keyu"/>
+
+    </resultMap>
+
+</mapper>
