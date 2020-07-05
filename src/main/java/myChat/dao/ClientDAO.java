@@ -1,13 +1,15 @@
 package myChat.dao;
 
-import myChat.Client;
+
+import myChat.bo.ClientM;
 
 import java.util.List;
 
 public interface ClientDAO {
-    void create(Client client);
-    Client getClientByLogin(String login);
-    List<Client> get();
-    void update(Client client);
+    void create(ClientM clientM);
+    ClientM getClientByLogin(String login);
+    List<ClientM> get();
+    void update(ClientM clientM);
     void delete(long id);
+    ClientM getSaltByLogin(String login);
 }

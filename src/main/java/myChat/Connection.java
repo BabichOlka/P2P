@@ -1,10 +1,10 @@
 package myChat;
 
 import myChat.bo.ConnectMessage;
+import myChat.dao.MessageDAOImpl;
 import myChat.io.exception.UnableToWriteException;
 import myChat.io.impl.stream.ObjectReader;
 import myChat.marshaller.*;
-import myChat.service.MessageService;
 import myChat.util.SerializationUtil;
 import org.apache.log4j.Logger;
 
@@ -33,12 +33,12 @@ public class Connection extends Thread{
               catch (IOException e) { e.printStackTrace(); }
 
             if (msg!=null && !msg.getMessage().equals("") ) {
-                new MessageService().createMessage(msg);
+                new MessageDAOImpl().create(msg);
                 try {
                     new XMLMarshaller().marshall(no, objr.getPath());
                 } catch (UnableToWriteException | JAXBException e) { e.printStackTrace(); }
 
-                msg.setMessage(Server.controlMessage(msg.getMessage()));    //filtering message
+                msg.setMessage(msg.getMessage());    //filtering message
                 log.info(msg.getMessage());
 
                 try {
