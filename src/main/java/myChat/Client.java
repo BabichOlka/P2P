@@ -1,61 +1,66 @@
 package myChat;
 
-import myChat.bo.*;
+import myChat.bo.ClientM;
+import myChat.bo.ClientReg;
+import myChat.bo.ConnectMessage;
+import myChat.bo.InitMessage;
 import myChat.constant.C10Constant;
-import myChat.dao.MessageDAOImpl;
 import myChat.io.exception.UnableToWriteException;
 import myChat.io.impl.stream.ObjectReader;
 import myChat.io.interfaces.Packable;
 import myChat.marshaller.XMLMarshaller;
-import myChat.service.ClientService;
-import myChat.util.*;
+import myChat.util.PropertyUtil;
+import myChat.util.SerializationUtil;
 
 import javax.xml.bind.JAXBException;
-import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
-import java.util.UUID;
+public class Client {
 
-public class Client{
+    private static final String HOST = PropertyUtil.getValueByKey(C10Constant.HOSTNAME);
+    private static final int PORT = Integer.valueOf(PropertyUtil.getValueByKey(C10Constant.PORT));
+    private static final String TOKEN = PropertyUtil.getValueByKey(C10Constant.TOKEN);
+    private static Scanner scan = new Scanner(System.in);
+    private static ObjectReader objr;
+    private List<ConnectMessage> messages;
+    private static String login;
 
-   private static final String HOST = PropertyUtil.getValueByKey(C10Constant.HOSTNAME);
-   private static final int PORT = Integer.valueOf(PropertyUtil.getValueByKey(C10Constant.PORT));
-   private static final String TOKEN = PropertyUtil.getValueByKey(C10Constant.TOKEN);
-   private static Scanner scan = new Scanner(System.in);
-   private static Date dateConnection;
-   private static String password;
-   private static String login;
-   private static ObjectReader objr;
-   private List<ConnectMessage> messages;
-   String salt = UUID.randomUUID().toString();
 
-    public Client(String login, Date dateConnection, String password, String salt) {
-        this.login = login;
-        this.password = password;
-        this.salt = UUID.randomUUID().toString();
-        this.dateConnection = new Date();
-        objr = new ObjectReader(System.getProperty("user.dir") + "/src/main/resources/" + login + ".xml");
-    }
-    public Client(){}
     public Client(String login ) {
         this.login = login;
         objr = new ObjectReader(System.getProperty("user.dir") + "/src/main/resources/" + login + ".xml");
     }
-    public static void main(String[] args) {
-        System.out.println("Your login: ");
-        String login = scan.nextLine();
-        System.out.println("Your password: ");
-        String password = scan.nextLine();
 
-        if (init(HOST, PORT, TOKEN, login, password,null)) {
-            while (true) {
-                connect();
+
+    public static void main(String[] args) {
+
+        System.out.println("Please enter 1 if you are registered, 2 if you are unregistered");
+        String answer1 = scan.nextLine();
+        //new ClientReg().askRegistration(answer1);
+
+        while (!answer1.equalsIgnoreCase("1") & !answer1.equalsIgnoreCase("2")) {
+            System.out.println("You entered a wrong symbol. Please choose 1 for yes, 2 for no to continue");
+            answer1 = scan.nextLine();
+        }
+
+        ClientM clientM = new ClientReg().askRegistration(answer1);
+
+        if ((clientM == null)) {
+            closeApp();
+        } else {
+            Client client = new Client(clientM.getLogin());
+            if (init(HOST, PORT, TOKEN, login)) {
+                while (true) {
+                    connect(clientM);
+                }
             }
         }
     }
 
-    private static boolean init(String host, int port, String token, String login, String password,String salt){
-        Packable imsg = new InitMessage(host, port,  token, login, password,salt);
+
+    private static boolean init(String host, int port, String token, String login){
+
+        Packable imsg = new InitMessage(host, port,  token, login);
         SerializationUtil.writeObject(imsg, SerializationUtil.getREADER_INIT().getPath());
         try {
             Thread.sleep(1500);
@@ -65,8 +70,10 @@ public class Client{
         Packable answer = SerializationUtil.readObject(SerializationUtil.getREADER_INIT());
         if(answer != null){
             System.out.println(((InitMessage) answer).getLogin() + " is accepted");
-            Client client = new Client(login, new Date(),password, salt);
-            new ClientService().createClient(client);
+
+//            Client client = new Client(login, new Date(),password, salt);
+//            new ClientService().createClient(client);
+
             return true;
         }
         else {
@@ -75,13 +82,15 @@ public class Client{
         }
     }
 
-    private static void connect() {
+    private static void connect(ClientM clientM) {
+
+        String login = clientM.getLogin();
+        Client client = new Client(login);
 
         System.out.print("You: ");
         String str = scan.nextLine();
-        String login_to = "v" +
-                "asa";
-        ConnectMessage msg = new ConnectMessage(str, login,login_to,null);
+        String login_to = "vasa";
+        ConnectMessage msg = new ConnectMessage(str, login,  login_to,null);
         //new MessageDAOImpl().create(msg);
         //msg.getMessage();
         try {
@@ -90,4 +99,12 @@ public class Client{
             e.printStackTrace();
         }
     }
+
+    public static void closeApp (){
+        while (true) {
+            System.out.println("The application will be closed ! ");
+            break;
+        }
+    }
 }
+

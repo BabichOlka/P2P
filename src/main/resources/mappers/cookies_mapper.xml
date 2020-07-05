@@ -8,24 +8,35 @@
         select * from
         cookies where login=#{login}
     </select>
-
+    <select id="getKeyByLogin" resultMap="cookies_map">
+        select keyu from
+        cookies where login=#{login}
+    </select>
 
     <insert id="create">
-        insert into client(c_name, u_password, dateConnection)
-        values(#{name},#{password}, CURRENT_TIME())
+        insert into cookies (login, dateConection,keyu)
+        values(#{login}, CURRENT_TIME(), #{key})
     </insert>
 
     <update id="update">
-        update client
-        set login=#{login}
+        update cookies
+        set dateConection = CURRENT_TIME()
         where login=#{login}
     </update>
 
-    <resultMap id="cookies_map" type="myChat.Client" autoMapping="false">
-        <id property="id" column="c_id"/>
+   <update id="updateDB">
+
+        update cookies
+        set keyu = null
+        where (now()-dateConection) 	&#60; 998000
+
+    </update>
+
+    <resultMap id="cookies_map" type="myChat.bo.Cookies" autoMapping="false">
+        <id property="idClient" column="idClient"/>
         <result property="login" column="login"/>
-        <result property="dateConnection" column="dateConnection"/>
-        <result property="password" column="u_password"/>
+        <result property="dateConnection" column="dateConection"/>
+        <result property="key" column="keyu"/>
 
     </resultMap>
 

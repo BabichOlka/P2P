@@ -4,7 +4,13 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="client_mapper">
     <select id="getClientByLogin" resultMap="client_map">
-        select * from
+        select login, password, dateConnection, salt from
+        client
+        where login = #{login}
+    </select>
+
+    <select id="getSaltByLogin" resultMap="client_map">
+        select salt, password from
         client
         where login = #{login}
     </select>
@@ -27,20 +33,20 @@
 
     <update id="update">
         update client
-        set dateConnection=#{CURRENT_TIME()}
+        set dateConnection = CURRENT_TIME()
         where login=#{login}
     </update>
 
-    <resultMap id="client_map" type="myChat.Client" autoMapping="false">
+    <resultMap id="client_map" type="myChat.bo.ClientM" autoMapping="false">
         <id property="id" column="c_id"/>
         <result property="login" column="login"/>
         <result property="dateConnection" column="dateConnection"/>
         <result property="password" column="password"/>
         <result property="salt" column="salt"/>
-        <collection property="messages" ofType="myChat.bo.ConnectMessage"> <!-- item -->
-            <id property="id" column="m_id" />
-            <result property="message" column="m_message" />
-        </collection>
+<!--        <collection property="messages" ofType="myChat.bo.ConnectMessage"> &lt;!&ndash; item &ndash;&gt;-->
+<!--            <id property="id" column="m_id" />-->
+<!--            <result property="message" column="m_message" />-->
+<!--        </collection>-->
     </resultMap>
 
 </mapper>
