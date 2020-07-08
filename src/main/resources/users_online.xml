@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <users_online>
     <userOnline>
-        <dateConnection>2020-07-08T14:11:25+03:00</dateConnection>
+        <dateConnection>2020-07-08T15:02:30+03:00</dateConnection>
         <key>11e763df-60ba-4260-b2ec-eabe287bb114</key>
         <login>masha</login>
     </userOnline>
     <userOnline>
-        <dateConnection>2020-07-08T14:05:55+03:00</dateConnection>
+        <dateConnection>2020-07-08T15:03:58+03:00</dateConnection>
         <key>8ef6954e-5a49-48f7-9dbb-6190d5e07870</key>
         <login>olga</login>
     </userOnline>
@@ -31,7 +31,7 @@
         <login>qqqq</login>
     </userOnline>
     <userOnline>
-        <dateConnection>2020-07-08T14:08:55+03:00</dateConnection>
+        <dateConnection>2020-07-08T15:03:04+03:00</dateConnection>
         <key>8c12ab65-8c03-4d35-be96-f46b68ce9aff</key>
         <login>bob</login>
     </userOnline>
