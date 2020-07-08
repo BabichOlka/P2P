@@ -25,3 +25,4 @@
 * for correct work MySQL set in the command line next configuration:
  SET GLOBAL max_connections = 1500;
  SET GLOBAL max_user_connections=110000;
+* If you want to run in parallel several instances of the same run configuration, select the “Allow running in parallel” checkbox in the Run/Debug Configuration dialog.
