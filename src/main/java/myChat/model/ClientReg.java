@@ -44,6 +44,14 @@ public class ClientReg {
             if (answer2.equalsIgnoreCase("Y")) {
                 System.out.println("Your login: ");
                 String login = scanner.nextLine();
+                if (clientDAO.getClientByLogin(login) != null) {
+                    while (clientDAO.getClientByLogin(login) != null) {
+                    System.out.println("This login exists! Please try again");
+                        System.out.println("Your login: ");
+                        String login1 = scanner.nextLine();
+                        login=login1;
+                     }
+                }
                 System.out.println("Your password: ");
                 String salt = UUID.randomUUID().toString();
                 String password = Integer.toHexString(salt.concat(scanner.nextLine()).hashCode());
