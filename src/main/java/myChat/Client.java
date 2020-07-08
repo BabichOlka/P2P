@@ -86,8 +86,8 @@ public class Client {
             CheckMessage checkMessage = readCheckMessage(System.getProperty("user.dir") + "/src/main/resources/checkMessage/"
                     + messageForMe.getClientLogin() + messageForMe.getLogin_to() + ".xml");
 
-            if (checkMessage != null & String.valueOf((messageForMe.getClientLogin() + messageForMe.getLogin_to() + messageForMe.getMessage()).hashCode())
-                    .equalsIgnoreCase(checkMessage.getMessage())) {
+            if (checkMessage != null && String.valueOf((messageForMe.getClientLogin() + messageForMe.getLogin_to()
+                    + messageForMe.getMessage()).hashCode()).equalsIgnoreCase(checkMessage.getMessage())) {
                 System.out.println("You have a message from: " + messageForMe.getClientLogin());
                 System.out.println("Date: " + messageForMe.getDateCreate());
                 System.out.println("Message: " + messageForMe.getMessage());
