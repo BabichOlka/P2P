@@ -1,57 +1,52 @@
 package myChat;
 
-import myChat.bo.ConnectMessage;
 import myChat.io.exception.UnableToWriteException;
-import myChat.io.impl.stream.ObjectReader;
-import myChat.marshaller.*;
-import myChat.service.MessageService;
-import myChat.util.SerializationUtil;
+import myChat.marshaller.XMLMarshaller;
+import myChat.marshaller.XMLUnmarshaller;
+import myChat.model.CheckMessage;
 import org.apache.log4j.Logger;
-
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 
 public class Connection extends Thread{
-    ConnectMessage no = new ConnectMessage("", "");
-    private ObjectReader objr;
+
+    private String objr;
     private Logger log = Logger.getLogger("connect");
     private String conName;
 
     public Connection(String name) {
         super(name);
         this.conName = name;
-        this.objr = new ObjectReader(System.getProperty("user.dir") + "/src/main/resources/" + name +".xml");
+        this.objr = System.getProperty("user.dir") + "/src/main/resources/checkMessage/" + name +".xml";
     }
-
     @Override
     public void run() {
         while(true){
-            ConnectMessage msg = null;
-            try {
-                msg = new XMLunMarshaller().unmarshall(objr.getPath());//readMessage
-            } catch (JAXBException ignored) {}//  do nothing
-              catch (IOException e) { e.printStackTrace(); }
+
+            CheckMessage msg = readCheckMessage(objr);
 
             if (msg!=null && !msg.getMessage().equals("") ) {
-                new MessageService().createMessage(msg);
                 try {
-                    new XMLMarshaller().marshall(no, objr.getPath());
-                } catch (UnableToWriteException | JAXBException e) { e.printStackTrace(); }
-
-                msg.setMessage(Server.controlMessage(msg.getMessage()));    //filtering message
-                log.info(msg.getMessage());
-
-                try {
-                    new XMLMarshaller().marshall(msg, SerializationUtil.getCHAT().getPath());
+                    new XMLMarshaller().marshall(msg, System.getProperty("user.dir") +"/src/main/resources/checkMessage/"
+                            + msg.getClientLogin() + msg.getLogin_to() +".xml");//write
                 } catch (UnableToWriteException | JAXBException e) {
                     e.printStackTrace();
                 }
             }
             try {
-                Thread.sleep(5000);
+                Thread.sleep(3000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private static CheckMessage readCheckMessage(String messagePath) {
+        try {
+            CheckMessage checkMessage = new XMLUnmarshaller().unmarshallCheckMessage(messagePath);
+            return checkMessage;
+        } catch (IOException | JAXBException ioe) {
+            return null;
         }
     }
 }

@@ -15,7 +15,7 @@
         where m_id=#{id}
     </update>
 
-    <resultMap id="message_map" type="myChat.bo.ConnectMessage" autoMapping="false">
+    <resultMap id="message_map" type="myChat.model.ConnectMessage" autoMapping="false">
         <id property="id" column="m_id"/>
         <result property="message" column="m_message"/>
         <result property="clientLogin" column="login_from"/>

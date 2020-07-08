@@ -1,55 +1,57 @@
 package myChat;
 
-import myChat.bo.InitMessage;
-import myChat.filter.MessageFilter;
-import myChat.filter.messageFilter.*;
-import myChat.io.impl.stream.ObjectReader;
-import myChat.io.interfaces.Packable;
-import myChat.util.SerializationUtil;
+import myChat.model.Cookies;
+import myChat.model.InitMessage;
+import myChat.model.OnlineUsers;
+import myChat.dao.CookiesDAOImpl;
+import myChat.io.exception.UnableToWriteException;
+import myChat.marshaller.XMLMarshaller;
+import myChat.marshaller.XMLUnmarshaller;
 
+import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
-import java.util.logging.Logger;
+import java.util.Date;
+import java.util.UUID;
 
-public class Server{
-    private static final List<String> AVAILABLE_CLIENTS = Arrays.asList("user");
+public class Server {
+
     private static final String HOST = "127.0.0.1";
     private static final int PORT = 8000;
+    private static String pathTo = "src/main/resources/initMessage.xml";
+    private static String USERS_ONLINE_FILE = "src/main/resources/users_online.xml";
 
-    private static final List<MessageFilter> filter = new ArrayList<>();
-    {   filter.add(new SpaceFilter());
-        filter.add(new BadwordsFilter());
-        filter.add(new CountryFilter());
-        filter.add(new EmojiFilter());
-        filter.add(new FirstLetterFilter());
-        filter.add(new NameFilter());
-    }
-
-    public static void main(String[] args){
-        while(true){
+    public static void main(String[] args) throws InterruptedException, JAXBException, IOException, UnableToWriteException {
+        new CookiesDAOImpl().updateDB();
+        System.out.println("Server is updated!");
+        while (true) {
             listen();
         }
     }
 
-    private static void listen() {
-        Packable imsg = SerializationUtil.readObject(SerializationUtil.getREADER_INIT());
-        if(imsg != null){
-            if (checkClient((InitMessage) imsg)){
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                Connection conn = new Connection(((InitMessage) imsg).getLogin());
+    private static void listen() throws InterruptedException, JAXBException, IOException, UnableToWriteException {
+        InitMessage imsg = readMessage(pathTo);
+        if (imsg != null) {
+            Thread.sleep(2000);
+            if (checkClient(imsg)) {
+
+                Connection conn = new Connection(imsg.getLogin());
                 conn.start();
-                clearBuffer(SerializationUtil.getREADER_INIT());
+                String key = UUID.randomUUID().toString();
+                Cookies cookies = new Cookies((imsg.getLogin()), new Date(), key);
+                if (new CookiesDAOImpl().get(imsg.getLogin()) != null) {
+
+                    new CookiesDAOImpl().update(new CookiesDAOImpl().get(imsg.getLogin()));
+
+                } else new CookiesDAOImpl().create(cookies);
             }
+            OnlineUsers onlineUsers = new CookiesDAOImpl().getOnlineUsers();
+            new XMLMarshaller().marshall(onlineUsers, USERS_ONLINE_FILE);
         }
     }
 
-    private static boolean checkClient(InitMessage imsg){
-          if (imsg.getHost().equals(HOST) && imsg.getPort() == PORT && AVAILABLE_CLIENTS.contains(imsg.getToken())){
+    private static boolean checkClient(InitMessage imsg) {
+        if (imsg.getHost().equals(HOST) && imsg.getPort() == PORT) {
             File client = new File(System.getProperty("user.dir") + "/src/main/resources/" + imsg.getLogin() + ".xml");
             try {
                 client.createNewFile();
@@ -57,21 +59,19 @@ public class Server{
                 e.printStackTrace();
             }
             return true;
-        }
-        else {
-            clearBuffer(SerializationUtil.getREADER_INIT());
+        } else {
+
             return false;
         }
     }
 
-    public static void clearBuffer(ObjectReader objr){
-        SerializationUtil.writeObject(null, objr.getPath());
+    private static InitMessage readMessage(String pathTo) {
+        try {
+            return new XMLUnmarshaller().unmarshallMessage(pathTo);
+        } catch (IOException | JAXBException ioe) {
+            ioe.printStackTrace();
+            throw new RuntimeException("Something went wrong while unmarshalling!");
+        }
     }
 
-    public static String controlMessage(String message){
-        for(MessageFilter filt:filter){
-            message = filt.apply(message);
-        }
-        return message;
-    }
 }
