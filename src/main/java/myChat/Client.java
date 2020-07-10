@@ -144,8 +144,6 @@ public class Client {
     private static CheckMessage readCheckMessage(String messagePath) {
         try {
             CheckMessage checkMessage = new XMLUnmarshaller().unmarshallCheckMessage(messagePath);
-            File messageFile = new File(messagePath);
-            // messageFile.delete();
             return checkMessage;
         } catch (IOException | JAXBException ioe) {
             return null;
@@ -183,7 +181,7 @@ public class Client {
         }
 
     }
-    private static boolean checkReceiverIsOnline(String login_to) {
+    public static boolean checkReceiverIsOnline(String login_to) {
         OnlineUsers onlineUsers = readOnlineUsers(USERS_ONLINE_FILE);
         boolean isUserOnline = false;
         for (Cookies cookies : onlineUsers.getUserOnline()) {

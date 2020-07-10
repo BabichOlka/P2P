@@ -26,7 +26,7 @@ public class Server {
 
     public static void main(String[] args) throws InterruptedException, JAXBException, UnableToWriteException {
         new CookiesService().updateCookiesDB();
-        LOGGER.info("Server is updated!");
+        LOGGER.info("Server is running!");
         while (true) {
             listen();
         }
@@ -40,7 +40,7 @@ public class Server {
             Thread.sleep(2000);
 
             if (checkClient(imsg)) {
-                LOGGER.info(imsg.getLogin() + " is accepted");
+
                 ServerConnection connection = new ServerConnection(imsg.getLogin());
                 connection.start();
                 createCookies(imsg.getLogin());
