@@ -1,8 +1,8 @@
 package myChat.marshaller;
 
-import myChat.model.CheckMessage;
-import myChat.model.ConnectMessage;
-import myChat.model.InitMessage;
+import myChat.message.CheckMessage;
+import myChat.message.ConnectMessage;
+import myChat.message.InitMessage;
 import myChat.model.OnlineUsers;
 
 import javax.xml.bind.JAXBContext;

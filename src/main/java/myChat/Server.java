@@ -1,12 +1,13 @@
 package myChat;
 
-import myChat.model.Cookies;
-import myChat.model.InitMessage;
-import myChat.model.OnlineUsers;
-import myChat.dao.CookiesDAOImpl;
 import myChat.io.exception.UnableToWriteException;
 import myChat.marshaller.XMLMarshaller;
 import myChat.marshaller.XMLUnmarshaller;
+import myChat.message.InitMessage;
+import myChat.model.Cookies;
+import myChat.model.OnlineUsers;
+import myChat.service.CookiesService;
+import org.apache.log4j.Logger;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
@@ -21,33 +22,41 @@ public class Server {
     private static String pathTo = "src/main/resources/initMessage.xml";
     private static String USERS_ONLINE_FILE = "src/main/resources/users_online.xml";
 
-    public static void main(String[] args) throws InterruptedException, JAXBException, IOException, UnableToWriteException {
-        new CookiesDAOImpl().updateDB();
-        System.out.println("Server is updated!");
+    public static final Logger LOGGER = Logger.getLogger(Server.class);
+
+    public static void main(String[] args) throws InterruptedException, JAXBException, UnableToWriteException {
+        new CookiesService().updateCookiesDB();
+        LOGGER.info("Server is updated!");
         while (true) {
             listen();
         }
     }
 
-    private static void listen() throws InterruptedException, JAXBException, IOException, UnableToWriteException {
+    private static void listen() throws InterruptedException, JAXBException, UnableToWriteException {
+
         InitMessage imsg = readMessage(pathTo);
+
         if (imsg != null) {
             Thread.sleep(2000);
+
             if (checkClient(imsg)) {
-
-                Connection conn = new Connection(imsg.getLogin());
-                conn.start();
-                String key = UUID.randomUUID().toString();
-                Cookies cookies = new Cookies((imsg.getLogin()), new Date(), key);
-                if (new CookiesDAOImpl().get(imsg.getLogin()) != null) {
-
-                    new CookiesDAOImpl().update(new CookiesDAOImpl().get(imsg.getLogin()));
-
-                } else new CookiesDAOImpl().create(cookies);
+                LOGGER.info(imsg.getLogin() + " is accepted");
+                ServerConnection connection = new ServerConnection(imsg.getLogin());
+                connection.start();
+                createCookies(imsg.getLogin());
             }
-            OnlineUsers onlineUsers = new CookiesDAOImpl().getOnlineUsers();
+            OnlineUsers onlineUsers = new CookiesService().getOnlineUsers();
             new XMLMarshaller().marshall(onlineUsers, USERS_ONLINE_FILE);
         }
+    }
+
+    public static void createCookies(String login){
+        String key = UUID.randomUUID().toString();
+        Cookies cookies = new Cookies(login, new Date(), key);
+
+        if (new CookiesService().getCookies(login) != null) {
+            new CookiesService().updateCookies(new CookiesService().getCookies(login));
+        } else new CookiesService().createCookies(cookies);
     }
 
     private static boolean checkClient(InitMessage imsg) {
@@ -60,7 +69,6 @@ public class Server {
             }
             return true;
         } else {
-
             return false;
         }
     }
@@ -73,5 +81,4 @@ public class Server {
             throw new RuntimeException("Something went wrong while unmarshalling!");
         }
     }
-
 }

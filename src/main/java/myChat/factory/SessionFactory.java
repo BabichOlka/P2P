@@ -1,4 +1,4 @@
-package myChat.config;
+package myChat.factory;
 
 
 import org.apache.ibatis.io.Resources;

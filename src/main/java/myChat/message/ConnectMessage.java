@@ -1,28 +1,29 @@
-package myChat.model;
+package myChat.message;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Date;
 
-@XmlRootElement(name = "Check_message")
-public class CheckMessage {
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "Connect_message")
+public class ConnectMessage {
     private String message;
     private String clientLogin;
     private String login_to;
     private Date dateCreate;
 
-    public CheckMessage(String message, String clientLogin) {
+    public ConnectMessage(String message, String clientLogin) {
         this.message = message;
         this.clientLogin = clientLogin;
     }
 
-    public CheckMessage(String message, String clientLogin, String login_to, Date dateCreate) {
+    public ConnectMessage(String message, String clientLogin, String login_to, Date dateCreate) {
         this.message = message;
         this.clientLogin = clientLogin;
         this.login_to = login_to;
         this.dateCreate = dateCreate;
     }
 
-    public CheckMessage() {
+    public ConnectMessage() {
     }
 
     public String getMessage() {

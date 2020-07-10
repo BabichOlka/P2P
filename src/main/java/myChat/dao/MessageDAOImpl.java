@@ -1,7 +1,7 @@
 package myChat.dao;
 
-import myChat.model.ConnectMessage;
-import myChat.config.SessionFactory;
+import myChat.message.ConnectMessage;
+import myChat.factory.SessionFactory;
 import org.apache.ibatis.session.SqlSession;
 
 public class MessageDAOImpl implements MessageDAO {
@@ -18,23 +18,10 @@ public class MessageDAOImpl implements MessageDAO {
     }
     @Override
     public void update(ConnectMessage msg) {
+        SqlSession sqlSession = SessionFactory.getSession(resource);
+        sqlSession.insert(namespace + ".update", msg);
+        sqlSession.commit();
+        sqlSession.close();
 
     }
-
-//    @Override
-//    public ConnectMessage getById(long id) {
-//        return null;
-//    }
-//
-//    @Override
-//    public List<ConnectMessage> get() {
-//        return null;
-//    }
-
-
-
-//    @Override
-//    public void delete(long id) {
-//
-//    }
 }

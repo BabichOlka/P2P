@@ -10,7 +10,7 @@
     </select>
 
     <select id="getSaltByLogin" resultMap="client_map">
-        select salt, password from
+        select salt from
         client
         where login = #{login}
     </select>
@@ -36,17 +36,30 @@
         set dateConnection = CURRENT_TIME()
         where login=#{login}
     </update>
+    <select id="getMessageByLogin" resultMap="client_map">
 
-    <resultMap id="client_map" type="myChat.model.ClientM" autoMapping="false">
+        SELECT * FROM
+        message m  left join client c
+        on m.login_to=c.login
+        WHERE c.login =#{login}
+
+    </select>
+
+    <resultMap id="client_map" type="myChat.model.ClientModel" autoMapping="false">
         <id property="id" column="c_id"/>
         <result property="login" column="login"/>
         <result property="dateConnection" column="dateConnection"/>
         <result property="password" column="password"/>
         <result property="salt" column="salt"/>
-<!--        <collection property="messages" ofType="myChat.model.ConnectMessage"> &lt;!&ndash; item &ndash;&gt;-->
-<!--            <id property="id" column="m_id" />-->
-<!--            <result property="message" column="m_message" />-->
-<!--        </collection>-->
+
+        <collection property="messages" ofType="myChat.message.ConnectMessage">
+          <id property="id" column="m_id" />
+            <result property="message" column="m_message"/>
+            <result property="clientLogin" column="login_from"/>
+            <result property="login_to" column="login_to"/>
+            <result property="dateCreate" column="dateCreate"/>
+       </collection>
+
     </resultMap>
 
 </mapper>

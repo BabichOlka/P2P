@@ -28,8 +28,8 @@
 
         update cookies
         set keyu = null
-        where (-dateConection) 	&#62; 998000 <!--&#60;	<	знак "меньше"
-&#62;	>	знак "больше" -->
+        where (-dateConection) 	&#62; 998000
+
 
     </update>
 
@@ -37,8 +37,8 @@
     SELECT * FROM cookies WHERE keyu IS NOT NULL
   </select>
 
-    <resultMap id="cookies_map" type="myChat.model.Cookies" autoMapping="false">
 
+    <resultMap id="cookies_map" type="myChat.model.Cookies" autoMapping="false">
         <result property="login" column="login"/>
         <result property="dateConnection" column="dateConection"/>
         <result property="key" column="keyu"/>

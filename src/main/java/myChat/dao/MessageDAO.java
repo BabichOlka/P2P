@@ -1,6 +1,6 @@
 package myChat.dao;
 
-import myChat.model.ConnectMessage;
+import myChat.message.ConnectMessage;
 
 public interface MessageDAO {
     void create(ConnectMessage message);

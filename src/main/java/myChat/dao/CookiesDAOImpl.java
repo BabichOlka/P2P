@@ -5,12 +5,13 @@ import java.util.List;
 import org.apache.ibatis.session.SqlSession;
 import myChat.model.Cookies;
 import myChat.model.OnlineUsers;
-import myChat.config.SessionFactory;
+import myChat.factory.SessionFactory;
 
 public class CookiesDAOImpl implements CookiesDAO {
     private final static String namespace = "cookies_mapper";
     String resource = "mybatisconfigServer.xml";
 
+    @Override
     public void create(Cookies cookies) {
         SqlSession sqlSession = SessionFactory.getSession(resource);
         sqlSession.insert(namespace + ".create", cookies);
@@ -18,6 +19,7 @@ public class CookiesDAOImpl implements CookiesDAO {
         sqlSession.close();
     }
 
+    @Override
     public void update(Cookies cookies) {
         SqlSession sqlSession = SessionFactory.getSession(resource);
         sqlSession.update(namespace + ".update", cookies);
@@ -25,6 +27,7 @@ public class CookiesDAOImpl implements CookiesDAO {
         sqlSession.close();
     }
 
+    @Override
     public void delete(String login) {
         SqlSession sqlSession = SessionFactory.getSession(resource);
         sqlSession.delete(namespace + ".deleteById", login);
@@ -32,13 +35,15 @@ public class CookiesDAOImpl implements CookiesDAO {
         sqlSession.close();
     }
 
+    @Override
     public Cookies getKeyByLogin(String login) {
         SqlSession sqlSession = SessionFactory.getSession(resource);
-        Cookies cookies = sqlSession.selectOne(namespace + ".getKeyByLogin", login);
+        Cookies key = sqlSession.selectOne(namespace + ".getKeyByLogin", login);
         sqlSession.close();
-        return cookies;
+        return key;
     }
 
+    @Override
     public Cookies get(String login) {
         SqlSession sqlSession = SessionFactory.getSession(resource);
         Cookies cookies = sqlSession.selectOne(namespace + ".get", login);
@@ -46,6 +51,7 @@ public class CookiesDAOImpl implements CookiesDAO {
         return cookies;
     }
 
+    @Override
     public void updateDB() {
         SqlSession sqlSession = SessionFactory.getSession(resource);
         sqlSession.update(namespace + ".updateDB");

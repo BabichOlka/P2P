@@ -1,11 +1,17 @@
 package myChat;
 
-import myChat.constant.C10Constant;
-import myChat.dao.MessageDAOImpl;
+import myChat.authorization.ClientReg;
+import myChat.constant.Constant;
 import myChat.io.exception.UnableToWriteException;
 import myChat.marshaller.XMLMarshaller;
 import myChat.marshaller.XMLUnmarshaller;
-import myChat.model.*;
+import myChat.message.CheckMessage;
+import myChat.message.ConnectMessage;
+import myChat.message.InitMessage;
+import myChat.model.ClientModel;
+import myChat.model.Cookies;
+import myChat.model.OnlineUsers;
+import myChat.service.MessageService;
 import myChat.util.PropertyUtil;
 
 import javax.xml.bind.JAXBException;
@@ -18,42 +24,47 @@ import java.util.Scanner;
 
 public class Client {
 
-    private static final String HOST = PropertyUtil.getValueByKey(C10Constant.HOSTNAME);
-    private static final int PORT = Integer.valueOf(PropertyUtil.getValueByKey(C10Constant.PORT));
-    private static final String TOKEN = PropertyUtil.getValueByKey(C10Constant.TOKEN);
+    private static final String HOST = PropertyUtil.getValueByKey(Constant.HOSTNAME);
+    private static final int PORT = Integer.valueOf(PropertyUtil.getValueByKey(Constant.PORT));
+    private static final String TOKEN = PropertyUtil.getValueByKey(Constant.TOKEN);
     private static Scanner scan = new Scanner(System.in);
-    private static String objr;
+    private static String pathForConnect;
     private static String login;
     private static String pathTo = "src/main/resources/initMessage.xml";
     private static String USERS_ONLINE_FILE = "src/main/resources/users_online.xml";
 
     public Client(String login) {
         this.login = login;
-        objr = System.getProperty("user.dir") + "/src/main/resources/" + login + ".xml";
+        pathForConnect = System.getProperty("user.dir") + "/src/main/resources/" + login + ".xml";
     }
 
     public static void main(String[] args) {
 
-        System.out.println("Please enter 1 if you are registered, 2 if you are unregistered");
-        String answer1 = scan.nextLine();
+        String answer = askRegistration();
 
-        while (!answer1.equalsIgnoreCase("1") & !answer1.equalsIgnoreCase("2")) {
-            System.out.println("You entered a wrong symbol. Please choose 1 for yes, 2 for no to continue");
-            answer1 = scan.nextLine();
-        }
+        ClientModel clientModel = new ClientReg().registration(answer);
 
-        ClientM clientM = new ClientReg().askRegistration(answer1);
-
-        if ((clientM == null)) {
+        if ((clientModel == null)) {
             System.exit(0);
         } else {
-            Client client = new Client(clientM.getLogin());
+            Client client = new Client(clientModel.getLogin());
             if (init(HOST, PORT, TOKEN, login)) {
                 while (true) {
-                    connect(clientM);
+                    connect(clientModel);
                 }
             }
         }
+    }
+
+    public static String askRegistration() {
+        System.out.println("Please enter 1 if you are registered, 2 if you are unregistered");
+        String answer = scan.nextLine();
+
+        while (!answer.equalsIgnoreCase("1") & !answer.equalsIgnoreCase("2")) {
+            System.out.println("You entered a wrong symbol. Please choose 1 for yes, 2 for no to continue");
+            answer = scan.nextLine();
+        }
+        return answer;
     }
 
     private static boolean init(String host, int port, String token, String login) {
@@ -77,61 +88,26 @@ public class Client {
         }
     }
 
-    private static void connect(ClientM clientM) {
+    private static void connect(ClientModel clientModel) {
 
-        ConnectMessage messageForMe = readConnectMessage(objr);
+        ConnectMessage messageForMe = readConnectMessage(pathForConnect);
+        checkMessageForMe(messageForMe);
 
-        if (messageForMe != null) {
-
-            CheckMessage checkMessage = readCheckMessage(System.getProperty("user.dir") + "/src/main/resources/checkMessage/"
-                    + messageForMe.getClientLogin() + messageForMe.getLogin_to() + ".xml");
-
-            if (checkMessage != null && String.valueOf((messageForMe.getClientLogin() + messageForMe.getLogin_to()
-                    + messageForMe.getMessage()).hashCode()).equalsIgnoreCase(checkMessage.getMessage())) {
-                System.out.println("You have a message from: " + messageForMe.getClientLogin());
-                System.out.println("Date: " + messageForMe.getDateCreate());
-                System.out.println("Message: " + messageForMe.getMessage());
-            }
-        }
-        if (messageForMe == null) {
-            System.out.println("You don't have a message");
-        }
-        String login = clientM.getLogin();
         System.out.print("Send Message To: ");
         String login_to = scan.nextLine();
 
-        OnlineUsers onlineUsers = readOnlineUsers(USERS_ONLINE_FILE);
-        boolean isUserOnline = false;
-        for (Cookies cookies : onlineUsers.getUserOnline()) {
-            if (cookies.getLogin().equals(login_to)) {
-                isUserOnline = true;
-                break;
-            }
-        }
-        if (!isUserOnline) {
+        if (!checkReceiverIsOnline(login_to)) {
             System.out.println("User " + login_to + " is offline");
         } else {
+
             System.out.println("Write a message");
             String message = scan.nextLine();
-            String chmessage = String.valueOf((login + login_to + message).hashCode());
-            CheckMessage cmsg = new CheckMessage(chmessage, login, login_to, Date.from(LocalDateTime.now().toInstant(ZoneOffset.UTC)));
-            ConnectMessage msg = new ConnectMessage(message, login, login_to, Date.from(LocalDateTime.now().toInstant(ZoneOffset.UTC)));
+            writeMessageForMe(message, login_to);
 
-            new MessageDAOImpl().create(msg);
-            try {
-                new XMLMarshaller().marshall(msg, "src/main/resources/" + login_to + ".xml");//writeMessage
-            } catch (UnableToWriteException | JAXBException e) {
-                e.printStackTrace();
-            }
-            try {
-                new XMLMarshaller().marshall(cmsg, "src/main/resources/checkMessage/" + login_to + ".xml");//writeMessage
-            } catch (UnableToWriteException | JAXBException e) {
-                e.printStackTrace();
-            }
         }
-        System.out.println("Let's check if you have new message! Press any key");
+        System.out.println("Do  you want to read new message? Enter any key if yes or N if no");
         String answer = scan.nextLine();
-        if (answer.equals("N")) {
+        if (answer.equalsIgnoreCase("n")) {
             System.exit(-1);
         }
     }
@@ -176,7 +152,7 @@ public class Client {
         }
     }
 
-    private static void writeMessage(InitMessage b, String pathTo) {
+    private static void writeMessage(Object b, String pathTo) {
         try {
             new XMLMarshaller().marshall(b, pathTo);
         } catch (UnableToWriteException uwe) {
@@ -188,5 +164,45 @@ public class Client {
         }
     }
 
+    private static void checkMessageForMe(ConnectMessage messageForMe) {
+        if (messageForMe != null) {
+
+            CheckMessage checkMessage = readCheckMessage(System.getProperty("user.dir") + "/src/main/resources/checkMessage/"
+                    + messageForMe.getClientLogin() + messageForMe.getLogin_to() + ".xml");
+
+            if (checkMessage != null && String.valueOf((messageForMe.getClientLogin() + messageForMe.getLogin_to()
+                    + messageForMe.getMessage()).hashCode()).equalsIgnoreCase(checkMessage.getMessage())) {
+
+                System.out.println("You have a message from: " + messageForMe.getClientLogin());
+                System.out.println("Date: " + messageForMe.getDateCreate());
+                System.out.println("Message: " + messageForMe.getMessage());
+            }
+        }
+        if (messageForMe == null) {
+            System.out.println("You don't have a message");
+        }
+
+    }
+    private static boolean checkReceiverIsOnline(String login_to) {
+        OnlineUsers onlineUsers = readOnlineUsers(USERS_ONLINE_FILE);
+        boolean isUserOnline = false;
+        for (Cookies cookies : onlineUsers.getUserOnline()) {
+            if (cookies.getLogin().equals(login_to)) {
+                isUserOnline = true;
+                break;
+            }
+        }
+        return isUserOnline;
+    }
+    private static void writeMessageForMe(String message, String login_to) {
+        String cheskMessage = String.valueOf((login + login_to + message).hashCode());
+        CheckMessage cmsg = new CheckMessage(cheskMessage, login, login_to, Date.from(LocalDateTime.now().toInstant(ZoneOffset.UTC)));
+        ConnectMessage msg = new ConnectMessage(message, login, login_to, Date.from(LocalDateTime.now().toInstant(ZoneOffset.UTC)));
+
+        new MessageService().createMessage(msg);
+        writeMessage(msg, "src/main/resources/" + login_to + ".xml");
+        writeMessage(cmsg, "src/main/resources/checkMessage/" + login_to + ".xml");
+
+    }
 }
 

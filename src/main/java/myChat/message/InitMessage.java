@@ -1,4 +1,4 @@
-package myChat.model;
+package myChat.message;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;

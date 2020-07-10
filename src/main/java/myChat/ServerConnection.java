@@ -3,32 +3,33 @@ package myChat;
 import myChat.io.exception.UnableToWriteException;
 import myChat.marshaller.XMLMarshaller;
 import myChat.marshaller.XMLUnmarshaller;
-import myChat.model.CheckMessage;
+import myChat.message.CheckMessage;
 import org.apache.log4j.Logger;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 
-public class Connection extends Thread{
+public class ServerConnection extends Thread {
 
-    private String objr;
+    private String pathForCheckMsg;
     private Logger log = Logger.getLogger("connect");
     private String conName;
 
-    public Connection(String name) {
+    public ServerConnection(String name) {
         super(name);
         this.conName = name;
-        this.objr = System.getProperty("user.dir") + "/src/main/resources/checkMessage/" + name +".xml";
+        this.pathForCheckMsg = System.getProperty("user.dir") + "/src/main/resources/checkMessage/" + name + ".xml";
     }
+
     @Override
     public void run() {
-        while(true){
+        while (true) {
 
-            CheckMessage msg = readCheckMessage(objr);
+            CheckMessage msg = readCheckMessage(pathForCheckMsg);
 
-            if (msg!=null && !msg.getMessage().equals("") ) {
+            if (msg != null && !msg.getMessage().equals("")) {
                 try {
-                    new XMLMarshaller().marshall(msg, System.getProperty("user.dir") +"/src/main/resources/checkMessage/"
-                            + msg.getClientLogin() + msg.getLogin_to() +".xml");//write
+                    new XMLMarshaller().marshall(msg, System.getProperty("user.dir") + "/src/main/resources/checkMessage/"
+                            + msg.getClientLogin() + msg.getLogin_to() + ".xml");//write
                 } catch (UnableToWriteException | JAXBException e) {
                     e.printStackTrace();
                 }

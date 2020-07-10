@@ -1,23 +1,33 @@
 package myChat.model;
 
+import myChat.message.ConnectMessage;
 import java.util.Date;
+import java.util.List;
 
-public class ClientM {
+public class ClientModel {
 
     private String login;
     private String salt;
     private String password;
     private Date dateConnection;
+    private List<ConnectMessage> messages;
 
-
-    public ClientM() {
+    public ClientModel() {
     }
 
-    public ClientM(String login, String salt, String password, Date dateConnection) {
+    public ClientModel(String login, String salt, String password, Date dateConnection) {
         this.login = login;
         this.salt = salt;
         this.password = password;
         this.dateConnection = dateConnection;
+    }
+    public ClientModel(String login, String salt, String password, Date dateConnection,List<ConnectMessage> messages) {
+        this.login = login;
+        this.salt = salt;
+        this.password = password;
+        this.dateConnection = dateConnection;
+        this.messages = messages;
+
     }
 
     public String getLogin() {
